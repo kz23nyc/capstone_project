@@ -2,20 +2,51 @@
 
 var _express = _interopRequireDefault(require("express"));
 
+var _mongoose = _interopRequireDefault(require("mongoose"));
+
 var _morgan = _interopRequireDefault(require("morgan"));
+
+var _cors = _interopRequireDefault(require("cors"));
+
+var _dotenv = _interopRequireDefault(require("dotenv"));
+
+var _recipeRoutes = _interopRequireDefault(require("./routes/recipeRoutes.js"));
+
+var _categoryRoutes = _interopRequireDefault(require("./routes/categoryRoutes.js"));
+
+var _commentRoutes = _interopRequireDefault(require("./routes/commentRoutes.js"));
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { "default": obj }; }
 
-// import cors from 'cors';
-// import morgan from 'morgan';
+_dotenv["default"].config();
+
 var app = (0, _express["default"])();
-var PORT = process.env.PORT || 4000;
+var PORT = process.env.PORT || 4000; // =========== Connect to MongoDB===== //
+
+_mongoose["default"].connect(process.env.MONGODB_URI).then(function () {
+  return console.log("Connected to mongodb");
+})["catch"](function (error) {
+  return console.error(error);
+});
+
 app.get('/', function (req, res) {
-  res.send('Welcome to my Pantrylicious recipe API!');
+  res.send('Welcome to my Pantrylicious API!');
+}); // =========== Middleware ===== //
+
+app.use((0, _morgan["default"])("dev")); // logger for development
+
+app.use(_express["default"].json()); // parse incoming JSON request bodies
+
+app.use((0, _cors["default"])()); //Enable Cross-Origin Resource Sharing
+// =========== Routes ===== //
+
+app.use("/api/recipes", _recipeRoutes["default"]);
+app.use("/api/categories", _categoryRoutes["default"]);
+app.use("/api/comments", _commentRoutes["default"]); // Handling 404 Not Found
+
+app.use(function (req, res) {
+  res.status(404).send("Resource not found");
 });
 app.listen(PORT, function () {
-  return console.log("Server running on port: ".concat(PORT));
-}); // =========== Middleware ===== //
-// Log all requests using morgan with the 'dev' format
-
-app.use((0, _morgan["default"])('dev')); // logger
+  console.log("Server running on port: ".concat(PORT));
+});

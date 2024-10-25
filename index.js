@@ -1,40 +1,42 @@
-import express from 'express';
-import morgan from 'morgan';
-import cors from 'cors';
-import morgan from 'morgan';
-import dotenv from 'dotenv';
-import mongoose from 'mongoose';
+import express from "express";
+import mongoose from "mongoose";
+import morgan from "morgan";
+import cors from "cors";
+import dotenv from "dotenv";
+
+import recipeRoutes from "./routes/recipeRoutes.js";
+import categoryRoutes from "./routes/categoryRoutes.js";
+import commentRoutes from "./routes/commentRoutes.js";
 
 dotenv.config();
 const app = express();
 const PORT = process.env.PORT || 4000;
 
-// =========== Connect to DB ===== //
-try {
-    await mongoose.connect(process.env.MONGODB_URI);
-    console.log(`Connected to mongodb`);    
-} catch (error) {
-    console.error(error);
-}
+// =========== Connect to MongoDB===== //
+mongoose.connect(process.env.MONGODB_URI)
+  .then(() => console.log(`Connected to mongodb`))
+  .catch(error => console.error(error));
+
+app.get('/', (req, res) => {
+    res.send('Welcome to my Pantrylicious API!')
+});
 
 // =========== Middleware ===== //
-app.use(morgan('dev')); // logger for development
+app.use(morgan("dev")); // logger for development
 app.use(express.json()); // parse incoming JSON request bodies
-app.use(express.urlencoded({extended:true})); // Parses URL-encoded  bodies
-app.use(cors()); //Enable Cross-Origin Resource Sharing- allow backend to talk to frontend in the same machine
+app.use(cors()); //Enable Cross-Origin Resource Sharing
 
-//============ Routes ======== //
-app.use('/', projectRouter); //use the recipe router
+// =========== Routes ===== //
+app.use("/api/recipes", recipeRoutes);
+app.use("/api/categories", categoryRoutes);
+app.use("/api/comments", commentRoutes);
 
-app.get('/', (req,res) => {
-    res.send('Welcome to my Pantrylicious recipe API!')
+
+// Handling 404 Not Found
+app.use((req, res) => {
+  res.status(404).send("Resource not found");
 });
 
-// =========== Error Middleware ===== //
-app.use((e, req, res, next) => {
-    console.error(e);
-    res.status(500).json({message: e.message, error:e})
+app.listen(PORT, () => {
+  console.log(`Server running on port: ${PORT}`);
 });
-
-
-app.listen(PORT, () => console.log(`Server running on port: ${PORT}`));
