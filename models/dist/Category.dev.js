@@ -22,9 +22,12 @@ var categorySchema = new _mongoose["default"].Schema({
   }
 }, {
   timestamps: true
+}); // Index for category name to improve performance on queries involving the name
+
+categorySchema.index({
+  name: 1
 });
 
-var Category = _mongoose["default"].model('Category', categorySchema);
+var _default = _mongoose["default"].model("Category", categorySchema);
 
-var _default = Category;
 exports["default"] = _default;

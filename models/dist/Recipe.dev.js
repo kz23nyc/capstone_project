@@ -22,10 +22,11 @@ var recipeSchema = new _mongoose["default"].Schema({
     type: Number,
     required: true
   },
-  ingredients: [{
+  instructions: {
     type: String,
     required: true
-  }],
+  },
+  ingredients: [String],
   categories: [{
     type: _mongoose["default"].Schema.Types.ObjectId,
     ref: 'Category'
@@ -34,7 +35,6 @@ var recipeSchema = new _mongoose["default"].Schema({
   timestamps: true
 });
 
-var Recipe = _mongoose["default"].model('Recipe', recipeSchema);
+var _default = _mongoose["default"].model("Recipe", recipeSchema);
 
-var _default = Recipe;
 exports["default"] = _default;

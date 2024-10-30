@@ -21,24 +21,23 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { "d
 _dotenv["default"].config();
 
 var app = (0, _express["default"])();
-var PORT = process.env.PORT || 4000; // =========== Connect to MongoDB===== //
-
-_mongoose["default"].connect(process.env.MONGODB_URI).then(function () {
-  return console.log("Connected to mongodb");
-})["catch"](function (error) {
-  return console.error(error);
-});
-
-app.get('/', function (req, res) {
-  res.send('Welcome to my Pantrylicious API!');
-}); // =========== Middleware ===== //
-
-app.use((0, _morgan["default"])("dev")); // logger for development
+app.use((0, _cors["default"])()); //Enable Cross-Origin Resource Sharing
 
 app.use(_express["default"].json()); // parse incoming JSON request bodies
 
-app.use((0, _cors["default"])()); //Enable Cross-Origin Resource Sharing
-// =========== Routes ===== //
+app.use((0, _morgan["default"])("dev")); // logger for development
+
+var PORT = process.env.PORT || 4000; // =========== Connect to MongoDB===== //
+
+_mongoose["default"].connect(process.env.MONGODB_URI).then(function () {
+  return console.log("Connected to MongoDB");
+})["catch"](function (error) {
+  return console.error("Could not connect to MongoDB:", error);
+});
+
+app.get("/", function (req, res) {
+  res.send("Welcome to my Pantrylicious API!");
+}); // =========== Routes ===== //
 
 app.use("/api/recipes", _recipeRoutes["default"]);
 app.use("/api/categories", _categoryRoutes["default"]);

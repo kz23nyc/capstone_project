@@ -10,27 +10,26 @@ import commentRoutes from "./routes/commentRoutes.js";
 
 dotenv.config();
 const app = express();
+app.use(cors()); //Enable Cross-Origin Resource Sharing
+app.use(express.json()); // parse incoming JSON request bodies
+app.use(morgan("dev")); // logger for development
+
 const PORT = process.env.PORT || 4000;
 
 // =========== Connect to MongoDB===== //
-mongoose.connect(process.env.MONGODB_URI)
-  .then(() => console.log(`Connected to mongodb`))
-  .catch(error => console.error(error));
+mongoose
+  .connect(process.env.MONGODB_URI)
+  .then(() => console.log(`Connected to MongoDB`))
+  .catch((error) => console.error("Could not connect to MongoDB:", error));
 
-app.get('/', (req, res) => {
-    res.send('Welcome to my Pantrylicious API!')
+app.get("/", (req, res) => {
+  res.send("Welcome to my Pantrylicious API!");
 });
-
-// =========== Middleware ===== //
-app.use(morgan("dev")); // logger for development
-app.use(express.json()); // parse incoming JSON request bodies
-app.use(cors()); //Enable Cross-Origin Resource Sharing
 
 // =========== Routes ===== //
 app.use("/api/recipes", recipeRoutes);
 app.use("/api/categories", categoryRoutes);
 app.use("/api/comments", commentRoutes);
-
 
 // Handling 404 Not Found
 app.use((req, res) => {

@@ -7,6 +7,10 @@ exports["default"] = void 0;
 
 var _express = _interopRequireDefault(require("express"));
 
+var _mongoose = _interopRequireDefault(require("mongoose"));
+
+var _Recipe = _interopRequireDefault(require("../models/Recipe.js"));
+
 var _Category = _interopRequireDefault(require("../models/Category.js"));
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { "default": obj }; }
@@ -75,73 +79,151 @@ router.get('/', function _callee2(req, res) {
     }
   }, null, null, [[0, 7]]);
 });
-router.patch("/:id", function _callee3(req, res) {
-  var id, update, updatedCategory;
+router.get('/:categoryName', function _callee3(req, res) {
+  var categoryName, category, recipes;
   return regeneratorRuntime.async(function _callee3$(_context3) {
     while (1) {
       switch (_context3.prev = _context3.next) {
         case 0:
           _context3.prev = 0;
-          id = req.params.id;
-          update = req.body;
-          _context3.next = 5;
-          return regeneratorRuntime.awrap(_Category["default"].findByIdAndUpdate(id, update, {
-            "new": true
+          categoryName = req.params.categoryName;
+          _context3.next = 4;
+          return regeneratorRuntime.awrap(_Category["default"].findOne({
+            name: categoryName
           }));
 
-        case 5:
-          updatedCategory = _context3.sent;
-          res.status(200).json(updatedCategory);
-          _context3.next = 12;
-          break;
+        case 4:
+          category = _context3.sent;
+
+          if (category) {
+            _context3.next = 7;
+            break;
+          }
+
+          return _context3.abrupt("return", res.status(404).json({
+            message: "Category not found"
+          }));
+
+        case 7:
+          _context3.next = 9;
+          return regeneratorRuntime.awrap(_Recipe["default"].find({
+            categories: category._id
+          }).populate('categories'));
 
         case 9:
-          _context3.prev = 9;
+          recipes = _context3.sent;
+          res.status(200).json(recipes);
+          _context3.next = 16;
+          break;
+
+        case 13:
+          _context3.prev = 13;
           _context3.t0 = _context3["catch"](0);
-          res.status(400).json({
-            message: "Error updating category",
+          res.status(500).json({
+            message: 'Error retrieving recipes by category',
             error: _context3.t0
           });
 
-        case 12:
+        case 16:
         case "end":
           return _context3.stop();
       }
     }
-  }, null, null, [[0, 9]]);
-});
-router["delete"]("/:id", function _callee4(req, res) {
-  var id;
+  }, null, null, [[0, 13]]);
+}); // PUT route to update categories in a recipe
+
+router.put('/api/recipes/:id', function _callee4(req, res) {
+  var categories, categoryIds, categoryObjectIds, updatedRecipe;
   return regeneratorRuntime.async(function _callee4$(_context4) {
     while (1) {
       switch (_context4.prev = _context4.next) {
         case 0:
           _context4.prev = 0;
-          id = req.params.id;
+          categories = req.body.categories; // Find ObjectIds for the provided category names
+
           _context4.next = 4;
-          return regeneratorRuntime.awrap(_Category["default"].findByIdAndDelete(id));
+          return regeneratorRuntime.awrap(_Category["default"].find({
+            name: {
+              $in: categories
+            }
+          }).select('_id'));
 
         case 4:
-          res.status(200).json({
-            message: "Category deleted successfully"
+          categoryIds = _context4.sent;
+          console.log("Found Category IDs:", categoryIds);
+          categoryObjectIds = categoryIds.map(function (category) {
+            return category._id;
           });
+          console.log("Mapped Category ObjectIds:", categoryObjectIds);
           _context4.next = 10;
-          break;
-
-        case 7:
-          _context4.prev = 7;
-          _context4.t0 = _context4["catch"](0);
-          res.status(500).json({
-            message: "Error deleting category",
-            error: _context4.t0
-          });
+          return regeneratorRuntime.awrap(_Recipe["default"].findByIdAndUpdate(req.params.id, {
+            categories: categoryObjectIds
+          }, {
+            "new": true
+          }));
 
         case 10:
+          updatedRecipe = _context4.sent;
+
+          if (updatedRecipe) {
+            _context4.next = 13;
+            break;
+          }
+
+          return _context4.abrupt("return", res.status(404).json({
+            error: 'Recipe not found'
+          }));
+
+        case 13:
+          res.status(200).json(updatedRecipe);
+          _context4.next = 20;
+          break;
+
+        case 16:
+          _context4.prev = 16;
+          _context4.t0 = _context4["catch"](0);
+          console.error("Error in updating recipe:", _context4.t0);
+          res.status(500).json({
+            error: 'Failed to update recipe'
+          });
+
+        case 20:
         case "end":
           return _context4.stop();
       }
     }
-  }, null, null, [[0, 7]]);
+  }, null, null, [[0, 16]]);
+});
+router["delete"]("/:id", function _callee5(req, res) {
+  return regeneratorRuntime.async(function _callee5$(_context5) {
+    while (1) {
+      switch (_context5.prev = _context5.next) {
+        case 0:
+          _context5.prev = 0;
+          _context5.next = 3;
+          return regeneratorRuntime.awrap(_Category["default"].findByIdAndDelete(id));
+
+        case 3:
+          res.status(200).json({
+            message: "Category deleted successfully"
+          });
+          _context5.next = 9;
+          break;
+
+        case 6:
+          _context5.prev = 6;
+          _context5.t0 = _context5["catch"](0);
+          res.status(500).json({
+            message: "Error deleting category",
+            error: _context5.t0
+          });
+
+        case 9:
+        case "end":
+          return _context5.stop();
+      }
+    }
+  }, null, null, [[0, 6]]);
 });
 var _default = router;
 exports["default"] = _default;

@@ -10,11 +10,11 @@
   "keywords": [],
   "author": "kzmh",
   "license": "ISC",
-  "description": "",
+  "description": "## Description Thanks for exploring the Best-README-Template! If you have any suggestions to improve it, feel free to fork the repository and submit a pull request, or open an issue with the \"enhancement\" tag. And don’t forget to give the project a star! We really appreciate your support. Now go build something incredible! 😄",
   "dependencies": {
     "cors": "^2.8.5",
     "dotenv": "^16.4.5",
-    "expres": "^0.0.5",
+    "express": "^4.21.1",
     "mongoose": "^8.7.2",
     "morgan": "^1.10.0"
   },

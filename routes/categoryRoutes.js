@@ -1,4 +1,6 @@
 import express from 'express';
+import mongoose from 'mongoose';
+import Recipe from '../models/Recipe.js';
 import Category from '../models/Category.js';
 
 const router = express.Router();
@@ -21,20 +23,52 @@ router.get('/', async (req, res) => {
     }
 });
 
-router.patch("/:id", async (req, res) => {
+router.get('/:categoryName', async (req, res) => {
     try {
-        const { id } = req.params;
-        const update = req.body;
-        const updatedCategory = await Category.findByIdAndUpdate(id, update, { new: true });
-        res.status(200).json(updatedCategory);
+        const { categoryName } = req.params;
+        const category = await Category.findOne({ name: categoryName });
+        if (!category) {
+            return res.status(404).json({ message: "Category not found" });
+        }
+        const recipes = await Recipe.find({ categories: category._id }).populate('categories');
+        res.status(200).json(recipes);
     } catch (error) {
-        res.status(400).json({ message: "Error updating category", error });
+        res.status(500).json({ message: 'Error retrieving recipes by category', error });
     }
 });
 
-router.delete("/:id", async (req, res) => {
+// PUT route to update categories in a recipe
+router.put('/api/recipes/:id', async (req, res) => {
     try {
-        const { id } = req.params;
+        const { categories } = req.body;
+
+        // Find ObjectIds for the provided category names
+        const categoryIds = await Category.find({ name: { $in: categories } }).select('_id');
+        console.log("Found Category IDs:", categoryIds);
+
+        const categoryObjectIds = categoryIds.map(category => category._id);
+        console.log("Mapped Category ObjectIds:", categoryObjectIds); 
+
+        const updatedRecipe = await Recipe.findByIdAndUpdate(
+            req.params.id,
+            { categories: categoryObjectIds },
+            { new: true }
+        );
+
+        if (!updatedRecipe) {
+            return res.status(404).json({ error: 'Recipe not found' });
+        }
+
+        res.status(200).json(updatedRecipe);
+    } catch (error) {
+        console.error("Error in updating recipe:", error);
+        res.status(500).json({ error: 'Failed to update recipe' });
+    }
+});
+
+
+router.delete("/:id", async (req, res) => {
+    try {      
         await Category.findByIdAndDelete(id);
         res.status(200).json({ message: "Category deleted successfully" });
     } catch (error) {

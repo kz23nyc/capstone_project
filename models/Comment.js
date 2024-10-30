@@ -1,24 +1,25 @@
-import mongoose from 'mongoose';
+import mongoose from "mongoose";
 
-const commentSchema = new mongoose.Schema({
-    recipe: {
-        type: mongoose.Schema.Types.ObjectId,
-        ref: 'Recipe',
-        required: true
-    },
-    user: {
-        type: String,
-        required: true
-    },
+const commentSchema = new mongoose.Schema(
+  {
     text: {
-        type: String,
-        required: true
+      type: String,
+      required: true
     },
-    date: {
-        type: Date,
-        default: Date.now
-    }
-}, { timestamps: true });
+    recipe: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "Recipe",
+      required: true
+    },
+    author: {
+      type: String,
+      default: "Anonymous"
+    },
+  },
+  { timestamps: true }
+);
 
-const Comment = mongoose.model('Comment', commentSchema);
-export default Comment;
+// Index for associating comments with recipes to improve performance on comment retrieval per recipe
+commentSchema.index({ recipe: 1 });
+
+export default mongoose.model("Comment", commentSchema);
