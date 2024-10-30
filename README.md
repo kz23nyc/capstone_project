@@ -1,23 +1,28 @@
-# Capstone Backend Project
+# Pantylicious API
 
 ## Description
-Thanks for exploring the Best-README-Template! If you have any suggestions to improve it, feel free to fork the repository and submit a pull request, or open an issue with the "enhancement" tag. And don’t forget to give the project a star! We really appreciate your support. Now go build something incredible! 😄
+The Pantrylicious API is a full-stack recipe management application built with MongoDB, Express, React, and Node.js (MERN). It allows users to create, manage, and browse recipes with category associations and user comments. 😄
 
-## Technolgoies
+## Features
+- Recipe creation, retrieval, update, and deletion.
+- Category creation and filtering of recipes by category.
+- Commenting on recipes.
+- RESTful API with full CRUD functionality.
 
-1. Node.js
-2. Express.js
-3. MongoDB
-4. Mongoose
-5. cors
-6. dotenv
-7. morgan
+## Technologies
+- Node.js
+- Express.js
+- MongoDB & Mongoose
+- CORS for cross-origin requests
+- dotenv for environment variable management
+- Morgan for logging
 
-## Acknowledgement
+## Setup Instructions
+1. Clone the repository.
+2. Run `npm install` to install dependencies.
+3. Set up a `.env` file with your MongoDB connection string (`MONGODB_URI`).
+4. Start the server with `npm run dev`.
 
-https://www.allrecipes.com/
-
-https://www.taste.com.au/quick-easy/galleries/top-100-easy-dinner-recipes/biccuul7
-
-https://github.com/kz23nyc/recipe-app.git
-
+## Acknowledgements
+- [All Recipes](https://www.allrecipes.com/)
+- [Taste](https://www.taste.com.au/quick-easy/galleries/top-100
