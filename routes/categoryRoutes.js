@@ -1,5 +1,4 @@
 import express from 'express';
-import mongoose from 'mongoose';
 import Recipe from '../models/Recipe.js';
 import Category from '../models/Category.js';
 
@@ -38,42 +37,39 @@ router.get('/:categoryName', async (req, res) => {
 });
 
 // PUT route to update categories in a recipe
-router.put('/api/recipes/:id', async (req, res) => {
+router.put('/:id/categories', async (req, res) => {
     try {
-        const { categories } = req.body;
+       // Extract categories from request body and find corresponding ObjectIds
+       const categoryIds = await getCategoryIdsFromNames(req.body.categories);
 
-        // Find ObjectIds for the provided category names
-        const categoryIds = await Category.find({ name: { $in: categories } }).select('_id');
-        console.log("Found Category IDs:", categoryIds);
-
-        const categoryObjectIds = categoryIds.map(category => category._id);
-        console.log("Mapped Category ObjectIds:", categoryObjectIds); 
-
+        // Update the recipe with new category IDs
         const updatedRecipe = await Recipe.findByIdAndUpdate(
             req.params.id,
-            { categories: categoryObjectIds },
-            { new: true }
-        );
+            // Ensuring only the categories field is updated
+            { $set: { categories: categoryIds } }, 
+            // Return the updated object and run schema validators 
+            { new: true, runValidators: true }  
+        ).populate('categories');
 
         if (!updatedRecipe) {
-            return res.status(404).json({ error: 'Recipe not found' });
+            return res.status(404).json({ message: 'Recipe not found' });
         }
 
         res.status(200).json(updatedRecipe);
     } catch (error) {
-        console.error("Error in updating recipe:", error);
-        res.status(500).json({ error: 'Failed to update recipe' });
+        console.error("Error updating recipe categories:", error);
+        res.status(500).json({ message: 'Failed to update recipe categories', error: error.toString() });
     }
 });
 
-
+// Deleting a Category by ID
 router.delete("/:id", async (req, res) => {
-    try {      
-        await Category.findByIdAndDelete(id);
-        res.status(200).json({ message: "Category deleted successfully" });
+    try {
+      await Category.findByIdAndDelete(req.params.id);
+      res.status(200).json({ message: "Category deleted successfully" });
     } catch (error) {
-        res.status(500).json({ message: "Error deleting category", error });
+      res.status(500).json({ message: "Error deleting category", error });
     }
-});
+  });
 
 export default router;

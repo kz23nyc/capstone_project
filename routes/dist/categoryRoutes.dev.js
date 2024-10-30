@@ -7,8 +7,6 @@ exports["default"] = void 0;
 
 var _express = _interopRequireDefault(require("express"));
 
-var _mongoose = _interopRequireDefault(require("mongoose"));
-
 var _Recipe = _interopRequireDefault(require("../models/Recipe.js"));
 
 var _Category = _interopRequireDefault(require("../models/Category.js"));
@@ -132,68 +130,64 @@ router.get('/:categoryName', function _callee3(req, res) {
   }, null, null, [[0, 13]]);
 }); // PUT route to update categories in a recipe
 
-router.put('/api/recipes/:id', function _callee4(req, res) {
-  var categories, categoryIds, categoryObjectIds, updatedRecipe;
+router.put('/:id/categories', function _callee4(req, res) {
+  var categoryIds, updatedRecipe;
   return regeneratorRuntime.async(function _callee4$(_context4) {
     while (1) {
       switch (_context4.prev = _context4.next) {
         case 0:
           _context4.prev = 0;
-          categories = req.body.categories; // Find ObjectIds for the provided category names
+          _context4.next = 3;
+          return regeneratorRuntime.awrap(getCategoryIdsFromNames(req.body.categories));
 
-          _context4.next = 4;
-          return regeneratorRuntime.awrap(_Category["default"].find({
-            name: {
-              $in: categories
-            }
-          }).select('_id'));
-
-        case 4:
+        case 3:
           categoryIds = _context4.sent;
-          console.log("Found Category IDs:", categoryIds);
-          categoryObjectIds = categoryIds.map(function (category) {
-            return category._id;
-          });
-          console.log("Mapped Category ObjectIds:", categoryObjectIds);
-          _context4.next = 10;
-          return regeneratorRuntime.awrap(_Recipe["default"].findByIdAndUpdate(req.params.id, {
-            categories: categoryObjectIds
-          }, {
-            "new": true
-          }));
+          _context4.next = 6;
+          return regeneratorRuntime.awrap(_Recipe["default"].findByIdAndUpdate(req.params.id, // Ensuring only the categories field is updated
+          {
+            $set: {
+              categories: categoryIds
+            }
+          }, // Return the updated object and run schema validators 
+          {
+            "new": true,
+            runValidators: true
+          }).populate('categories'));
 
-        case 10:
+        case 6:
           updatedRecipe = _context4.sent;
 
           if (updatedRecipe) {
-            _context4.next = 13;
+            _context4.next = 9;
             break;
           }
 
           return _context4.abrupt("return", res.status(404).json({
-            error: 'Recipe not found'
+            message: 'Recipe not found'
           }));
 
-        case 13:
+        case 9:
           res.status(200).json(updatedRecipe);
-          _context4.next = 20;
+          _context4.next = 16;
           break;
 
-        case 16:
-          _context4.prev = 16;
+        case 12:
+          _context4.prev = 12;
           _context4.t0 = _context4["catch"](0);
-          console.error("Error in updating recipe:", _context4.t0);
+          console.error("Error updating recipe categories:", _context4.t0);
           res.status(500).json({
-            error: 'Failed to update recipe'
+            message: 'Failed to update recipe categories',
+            error: _context4.t0.toString()
           });
 
-        case 20:
+        case 16:
         case "end":
           return _context4.stop();
       }
     }
-  }, null, null, [[0, 16]]);
-});
+  }, null, null, [[0, 12]]);
+}); // Deleting a Category by ID
+
 router["delete"]("/:id", function _callee5(req, res) {
   return regeneratorRuntime.async(function _callee5$(_context5) {
     while (1) {
@@ -201,7 +195,7 @@ router["delete"]("/:id", function _callee5(req, res) {
         case 0:
           _context5.prev = 0;
           _context5.next = 3;
-          return regeneratorRuntime.awrap(_Category["default"].findByIdAndDelete(id));
+          return regeneratorRuntime.awrap(_Category["default"].findByIdAndDelete(req.params.id));
 
         case 3:
           res.status(200).json({

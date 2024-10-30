@@ -29,7 +29,10 @@ app.use((0, _morgan["default"])("dev")); // logger for development
 
 var PORT = process.env.PORT || 4000; // =========== Connect to MongoDB===== //
 
-_mongoose["default"].connect(process.env.MONGODB_URI).then(function () {
+_mongoose["default"].connect(process.env.MONGODB_URI, {
+  useNewUrlParser: true,
+  useUnifiedTopology: true
+}).then(function () {
   return console.log("Connected to MongoDB");
 })["catch"](function (error) {
   return console.error("Could not connect to MongoDB:", error);
